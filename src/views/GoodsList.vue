@@ -12,16 +12,17 @@
                             <use xlink:href="#icon-arrow-short"></use>
                         </svg>
                     </a>
-                    <a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
+                    <a href="javascript:void(0)" @click="showFilterPop" class="filterby stopPop">Filter by</a>
                 </div>
                 <div class="accessory-result">
                     <!-- filter -->
-                    <div class="filter stopPop" id="filter">
+                    <div :class="['filter', 'stopPop', {'filterby-show': filterBy}]" id="filter">
                         <dl class="filter-price">
                             <dt>Price:</dt>
-                            <dd><a href="javascript:void(0)">All</a></dd>
-                            <dd v-for="item in priceFilter" :key="item.startPrice">
-                                <a href="javascript:void(0)">{{ item.startPrice | priceFormat }} - {{ item.endPrice | priceFormat }}</a>
+                            <dd><a href="javascript:void(0)" @click="setPriceFilter('all')" :class="{'cur': priceChecked === 'all'}">All</a></dd>
+                            <dd v-for="(item, i) in priceFilter" :key="item.startPrice">
+                                <a href="javascript:void(0)" @click="setPriceFilter(`${i}`)" :class="{'cur': priceChecked === i.toString()}">{{ item.startPrice | priceFormat }} - {{ item.endPrice |
+                                    priceFormat }}</a>
                             </dd>
                         </dl>
                     </div>
@@ -32,7 +33,7 @@
                             <ul>
                                 <li v-for="item in goodsList.result" :key="item.productId">
                                     <div class="pic">
-                                        <a href="javascripr:;"><img :src="`/images/${item.prodcutImg}`" alt=""></a>
+                                        <a href="javascripr:;"><img v-lazy="`/images/${item.prodcutImg}`" alt=""></a>
                                     </div>
                                     <div class="main">
                                         <div class="name">{{ item.productName }}</div>
@@ -48,6 +49,7 @@
                 </div>
             </div>
         </div>
+        <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
         <nav-footer></nav-footer>
     </div>
 </template>
@@ -71,8 +73,10 @@
     }
   })
   export default class GoodsList extends Vue {
-    @Provide() public goodsList: object = {}
-    @Provide() public priceFilter: object[] = [
+    @Provide()
+    public goodsList: object = {}
+    @Provide()
+    public priceFilter: object[] = [
       {
         startPrice: '0.00',
         endPrice: '100.00'
@@ -88,9 +92,25 @@
       {
         startPrice: '1000.00',
         endPrice: '2000.00'
-      },
+      }
     ]
+    @Provide()
+    public priceChecked: string = 'all'
+    public filterBy: boolean = false
+    public overLayFlag: boolean = false
 
+    public setPriceFilter(index: string): void {
+      this.priceChecked = index
+      this.closePop()
+    }
+    public showFilterPop(): void {
+      this.filterBy = true
+      this.overLayFlag = true
+    }
+    public closePop(): void {
+      this.filterBy = false
+      this.overLayFlag = false
+    }
     public async created() {
       this.goodsList = (await this.axios.get('/api/goods')).data
     }

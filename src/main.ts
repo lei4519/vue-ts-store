@@ -5,6 +5,10 @@ import store from './store'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 Vue.use(VueAxios, axios)
+import VueLazyload from 'vue-lazyload'
+Vue.use(VueLazyload, {
+  loading: '/loading/loading-bars.svg'
+})
 import '@/assets/css/base.css'
 import '@/assets/css/checkout.css'
 import '@/assets/css/login.css'
