@@ -4,15 +4,17 @@ import router from './router';
 import store from './store';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-Vue.use(VueAxios, axios);
+import infiniteScroll from 'vue-infinite-scroll';
 import VueLazyload from 'vue-lazyload';
-Vue.use(VueLazyload, {
-    loading: '/loading/loading-bars.svg'
-});
 import '@/assets/css/base.css';
 import '@/assets/css/checkout.css';
 import '@/assets/css/login.css';
 import '@/assets/css/product.css';
+Vue.use(VueAxios, axios);
+Vue.use(VueLazyload, {
+    loading: '/loading/loading-bars.svg'
+});
+Vue.use(infiniteScroll);
 Vue.config.productionTip = false;
 new Vue({
     router,
