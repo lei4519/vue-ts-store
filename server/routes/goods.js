@@ -15,11 +15,19 @@ mongoose.connection.on('disconnected', () => console.log('MongoDB connected disc
 
 router.get('/', async (req, res, next) => {
   try {
-    let params = req.param('salePriceFilter') ? req.param('salePriceFilter') : {}
+    let params = {}
     let page = parseInt(req.param('page'), 10)
     let pageSize = parseInt(req.param('pageSize'))
     let sort = parseInt(req.param('sort'))
     let skip = (page - 1) * pageSize
+    if (Boolean(parseInt(req.param('$lte'), 10))) {
+      params = {
+        salePrice: {
+          $gte: parseInt(req.param('$gte'), 10),
+          $lte: parseInt(req.param('$lte'), 10)
+        }
+      }
+    }
 
     let goodsModel = Goods.find(params)
     goodsModel.sort({salePrice: sort}).skip(skip).limit(pageSize)

@@ -114,10 +114,8 @@
     public setPriceFilter(index: string): void {
       this.priceChecked = index
       this.closePop()
+      this.goodsListReset()
       this.getGoodsList()
-      this.page = 1
-      this.goodsList = []
-      // TODO: ''
     }
 
     public showFilterPop(): void {
@@ -136,16 +134,26 @@
 
     @Watch('salePriceSort')
     public onSortChanged(val: string, oldVal: string): void {
-      this.page = 1
-      this.goodsList = []
+      this.goodsListReset()
       this.getGoodsList()
     }
 
     public async getGoodsList() {
+      this.busy = true
       const params = {
         page: this.page,
         pageSize: this.pageSize,
         sort: this.salePriceSort ? 1 : -1,
+        $gte: 0,
+        $lte: 0
+      }
+      if (this.priceChecked !== 'all') {
+        const filter = this.priceFilter[parseInt(this.priceChecked, 10)]
+        params.$gte = filter.startPrice
+        params.$lte = filter.endPrice
+      } else {
+        params.$gte = 0
+        params.$lte = 0
       }
       const result = (await this.axios.get('/goods', {
         params
@@ -157,11 +165,14 @@
     }
 
     public loadMore(): void {
-      this.busy = true
       setTimeout(() => {
         this.page++
         this.getGoodsList()
       }, 1000)
+    }
+    public goodsListReset() {
+      this.page = 1
+      this.goodsList = []
     }
   }
 </script>
