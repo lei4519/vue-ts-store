@@ -1,69 +1,70 @@
 <template>
-    <div>
-        <nav-header></nav-header>
-        <nav-bread><span slot="bread">Goods</span></nav-bread>
-        <div class="accessory-result-page accessory-page">
-            <div class="container">
-                <div class="filter-nav">
-                    <span class="sortby">Sort by:</span>
-                    <a href="javascript:void(0)" :class="['default', {cur: salePriceSort}]"
-                       @click="salePriceSort = !salePriceSort">Default</a>
-                    <a href="javascript:void(0)" :class="['pricel', {cur: !salePriceSort}]"
-                       @click="salePriceSort = !salePriceSort">Price
-                        <svg class="icon icon-arrow-short">
-                            <use xlink:href="#icon-arrow-short"></use>
-                        </svg>
-                    </a>
-                    <a href="javascript:void(0)" @click="showFilterPop" class="filterby stopPop">Filter by</a>
-                </div>
-                <div class="accessory-result">
-                    <!-- filter -->
-                    <div :class="['filter', 'stopPop', {'filterby-show': filterBy}]" id="filter">
-                        <dl class="filter-price">
-                            <dt>Price:</dt>
-                            <dd><a href="javascript:void(0)" @click="setPriceFilter('all')"
-                                   :class="{'cur': priceChecked === 'all'}">All</a></dd>
-                            <dd v-for="(item, i) in priceFilter" :key="item.startPrice">
-                                <a href="javascript:void(0)" @click="setPriceFilter(`${i}`)"
-                                   :class="{'cur': priceChecked === i.toString()}">{{ item.startPrice }} - {{
-                                    item.endPrice }}</a>
-                            </dd>
-                        </dl>
-                    </div>
+  <div>
+    <nav-header></nav-header>
+    <nav-bread><span slot="bread">Goods</span></nav-bread>
+    <div class="accessory-result-page accessory-page">
+      <div class="container">
+        <div class="filter-nav">
+          <span class="sortby">Sort by:</span>
+          <a href="javascript:void(0)" :class="['default', {cur: salePriceSort}]"
+             @click="salePriceSort = !salePriceSort">Default</a>
+          <a href="javascript:void(0)" :class="['pricel', {cur: !salePriceSort}]"
+             @click="salePriceSort = !salePriceSort">Price
+            <svg class="icon icon-arrow-short">
+              <use xlink:href="#icon-arrow-short"></use>
+            </svg>
+          </a>
+          <a href="javascript:void(0)" @click="showFilterPop" class="filterby stopPop">Filter by</a>
+        </div>
+        <div class="accessory-result">
+          <!-- filter -->
+          <div :class="['filter', 'stopPop', {'filterby-show': filterBy}]" id="filter">
+            <dl class="filter-price">
+              <dt>Price:</dt>
+              <dd><a href="javascript:void(0)" @click="setPriceFilter('all')"
+                     :class="{'cur': priceChecked === 'all'}">All</a></dd>
+              <dd v-for="(item, i) in priceFilter" :key="item.startPrice">
+                <a href="javascript:void(0)" @click="setPriceFilter(`${i}`)"
+                   :class="{'cur': priceChecked === i.toString()}">{{ item.startPrice }} - {{
+                  item.endPrice }}</a>
+              </dd>
+            </dl>
+          </div>
 
-                    <!-- search result accessories list -->
-                    <div class="accessory-list-wrap">
-                        <div class="accessory-list col-4">
-                            <ul>
-                                <li v-for="item in goodsList" :key="item._id">
-                                    <div class="pic">
-                                        <a href="javascripr:;"><img v-lazy="`/images/${item.productImage}`"></a>
-                                    </div>
-                                    <div class="main">
-                                        <div class="name">{{ item.productName }}</div>
-                                        <div class="price">{{ item.salePrice }}</div>
-                                        <div class="btn-area">
-                                            <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                            <div v-infinite-scroll="loadMore"
-                                 infinite-scroll-disabled="busy"
-                                 infinite-scroll-distance="10"
-                                 style="text-align: center;
+          <!-- search result accessories list -->
+          <div class="accessory-list-wrap">
+            <div class="accessory-list col-4">
+              <ul>
+                <li v-for="item in goodsList" :key="item._id">
+                  <div class="pic">
+                    <a href="javascripr:;"><img v-lazy="`/images/${item.productImage}`"></a>
+                  </div>
+                  <div class="main">
+                    <div class="name">{{ item.productName }}</div>
+                    <div class="price">{{ item.salePrice }}</div>
+                    <div class="btn-area">
+                      <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <div v-infinite-scroll="loadMore"
+                   infinite-scroll-disabled="busy"
+                   infinite-scroll-distance="10"
+                   style="text-align: center;
                                         font-size: 20px;
                                         font-weight: 700;">
-                                {{ isMore ? '加载中...' : '已经没有数据了' }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <img v-show="isMore" src="loading/loading-spinning-bubbles.svg">
+                <p v-show="!isMore">已经没有数据了</p>
+              </div>
             </div>
+          </div>
         </div>
-        <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
-        <nav-footer></nav-footer>
+      </div>
     </div>
+    <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+    <nav-footer></nav-footer>
+  </div>
 </template>
 
 <script lang="ts">
@@ -80,9 +81,7 @@
     }
   })
   export default class GoodsList extends Vue {
-    @Provide()
     public goodsList = []
-    @Provide()
     public priceFilter = [
       {
         startPrice: 0,
@@ -101,7 +100,6 @@
         endPrice: 2000
       }
     ]
-    @Provide()
     public priceChecked: string = 'all'
     public filterBy: boolean = false
     public overLayFlag: boolean = false
@@ -155,13 +153,18 @@
         params.$gte = 0
         params.$lte = 0
       }
-      const result = (await this.axios.get('/goods', {
+      const data = (await this.axios.get('/goods/goodsList', {
         params
-      })).data.result
+      })).data
 
-      this.goodsList = this.goodsList.concat(result.list)
-      this.busy = result.count < this.pageSize
-      this.isMore = !this.busy
+      if (data.status === '0') {
+        this.goodsList = this.goodsList.concat(data.result.list)
+        this.busy = data.result.count < this.pageSize
+        this.isMore = !this.busy
+      } else {
+        console.log(data.msg)
+        this.isMore = false
+      }
     }
 
     public loadMore(): void {
@@ -170,9 +173,17 @@
         this.getGoodsList()
       }, 1000)
     }
+
     public goodsListReset() {
       this.page = 1
       this.goodsList = []
+    }
+
+    public async addCart(productId: string) {
+      const data = (await this.axios.post('/goods/addCart', {
+        productId
+      })).data
+      alert(data.msg)
     }
   }
 </script>
