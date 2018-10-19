@@ -69,7 +69,7 @@
 <script lang="ts">
   import '../assets/css/login.css'
   import { Vue, Component } from 'vue-property-decorator'
-  import Modal from '../components/Modal'
+  import Modal from '@/components/Modal.vue'
 
 
 
@@ -121,6 +121,11 @@
       const result = (await this.axios.get('/users/checkLogin')).data
       if (result.status === '0') {
         this.nickName = result.result.userName
+      } else {
+        if (window.location.href !== 'http://localhost:8080/') {
+          // TODO: test
+          // window.location.href = '/'
+        }
       }
     }
     public mounted(): void {

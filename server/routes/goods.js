@@ -17,15 +17,15 @@ mongoose.connection.on('disconnected', () => console.log('MongoDB connected disc
 router.get('/goodsList', async (req, res) => {
   try {
     let params = {}
-    let page = parseInt(req.param('page'), 10)
-    let pageSize = parseInt(req.param('pageSize'))
-    let sort = parseInt(req.param('sort'))
+    let page = parseInt(req.query.page, 10)
+    let pageSize = parseInt(req.query.pageSize)
+    let sort = parseInt(req.query.sort)
     let skip = (page - 1) * pageSize
-    if (Boolean(parseInt(req.param('$lte'), 10))) {
+    if (Boolean(parseInt(req.query.$lte, 10))) {
       params = {
         salePrice: {
-          $gte: parseInt(req.param('$gte'), 10),
-          $lte: parseInt(req.param('$lte'), 10)
+          $gte: parseInt(req.query.$gte, 10),
+          $lte: parseInt(req.query.$lte, 10)
         }
       }
     }

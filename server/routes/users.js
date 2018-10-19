@@ -69,5 +69,23 @@ router.post('/login', async (req, res) => {
       })
     }
   })
+  .get('/cartList', async (req, res) => {
+    if (req.cookies.userId) {
+      const cartListDoc = await User.findOne({
+        userId: req.cookies.userId,
+      })
+      res.json({
+        status: '0',
+        msg: '',
+        result: cartListDoc.cartList
+      })
+    } else {
+      res.json({
+        status: '1',
+        msg: '未登录',
+        result: ''
+      })
+    }
+  })
 
 module.exports = router
