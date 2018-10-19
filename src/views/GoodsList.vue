@@ -63,21 +63,41 @@
       </div>
     </div>
     <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+    <modal :mdShow="mdShow" @closeModal="closeModal">
+      <p slot="message">请先登录, 否则无法加入到购物车</p>
+      <div slot="btnGroup">
+        <a href="javascript:;" class="btn btn--m" @click="mdShow=false">关闭</a>
+      </div>
+    </modal>
+    <modal :mdShow="mdShowCart" @closeModal="closeModal">
+      <p slot="message">
+        <svg class="icon-status-ok">
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status-ok"></use>
+        </svg>
+        <span>加入购物车成功</span>
+      </p>
+      <div slot="btnGroup">
+        <a href="javascript:;" class="btn btn--m" @click="mdShowCart=false">继续购物</a>
+        <router-link to="/cart" class="btn btn--m">查看购物车</router-link>
+      </div>
+    </modal>
     <nav-footer></nav-footer>
   </div>
 </template>
 
 <script lang="ts">
-  import { Component, Provide, Watch, Vue } from 'vue-property-decorator'
+  import { Component, Watch, Vue } from 'vue-property-decorator'
   import NavHeader from '@/components/NavHeader.vue'
   import NavFooter from '@/components/NavFooter.vue'
   import NavBread from '@/components/NavBread.vue'
+  import Modal from '@/components/Modal.vue'
 
   @Component({
     components: {
       NavHeader,
       NavFooter,
-      NavBread
+      NavBread,
+      Modal
     }
   })
   export default class GoodsList extends Vue {
@@ -108,6 +128,8 @@
     public pageSize: number = 8
     public busy: boolean = false
     public isMore: boolean = true
+    public mdShow: boolean = false
+    public mdShowCart: boolean = false
 
     public setPriceFilter(index: string): void {
       this.priceChecked = index
@@ -162,7 +184,6 @@
         this.busy = data.result.count < this.pageSize
         this.isMore = !this.busy
       } else {
-        console.log(data.msg)
         this.isMore = false
       }
     }
@@ -179,11 +200,20 @@
       this.goodsList = []
     }
 
+    public closeModal(): void {
+      this.mdShow = false
+      this.mdShowCart = false
+    }
+
     public async addCart(productId: string) {
       const data = (await this.axios.post('/goods/addCart', {
         productId
       })).data
-      alert(data.msg)
+      if (data.status === '0') {
+        this.mdShowCart = true
+      } else {
+        this.mdShow = true
+      }
     }
   }
 </script>

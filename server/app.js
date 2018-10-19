@@ -22,7 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // login verify handle
 app.use((req, res, next) => {
   const originalUrl = req.originalUrl
-  if (originalUrl.startsWith('/users') || originalUrl.includes('/goods/goodsList')) {
+  if (originalUrl === '/users/login' || originalUrl === '/users/logout' || originalUrl.includes('/goods/goodsList')) {
     return next()
   }
   if (!req.cookies.userId) {
