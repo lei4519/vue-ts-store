@@ -86,6 +86,24 @@ router.post('/login', async (req, res) => {
         result: ''
       })
     }
-  })
+	})
+	.post('/cart/del', async (req, res) => {
+		try {
+			const productId = req.body.productId
+			const userId = req.cookies.userId
+			await User.update({userId}, {$pull: {cartList: {productId}}})
+			res.json({
+				status: '0',
+				msg: '删除成功',
+				result: 'suc'
+			})
+		} catch (err) {
+			res.json({
+				status: '1',
+				msg: err.message,
+				result: ''
+			})
+		}
+	})
 
 module.exports = router

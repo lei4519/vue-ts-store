@@ -58,11 +58,11 @@
                 <li>Edit</li>
               </ul>
             </div>
-            <ul class="cart-item-list">
-              <li v-for="item in cartList" :key="item._id">
+            <transition-group tag="ul"  class="cart-item-list" mode="in-out">
+								<li v-for="item in cartList" :key="item._id">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" @click="cartChecked(item.productId)" :class="{'checked': item.checked === 0 ? false : true}">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -76,12 +76,12 @@
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">{{ item.salePrice }}</div>
+                  <div class="item-price">{{ item.salePrice * item.productNum }}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
-                      <div class="select-self-area">
+                      <div class="select-self-area" @click="changeProductNum(item.productId, $event)">
                         <a class="input-sub">-</a>
                         <span class="select-ipt">{{ item.productNum }}</span>
                         <a class="input-add">+</a>
@@ -94,7 +94,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" class="item-edit-btn">
+                    <a href="javascript:;" class="item-edit-btn" @click="delCartConfirm(item.productId)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -102,7 +102,7 @@
                   </div>
                 </div>
               </li>
-            </ul>
+						</transition-group>
           </div>
         </div>
         <div class="cart-foot-wrap">
@@ -129,6 +129,13 @@
         </div>
       </div>
     </div>
+    <modal :mdShow="modalConfirm" @closeModal="closeModal">
+      <p slot="message">您确定删除这件商品吗?</p>
+      <div slot="btnGroup">
+        <a class="btn btn--m" href="javascript:;" @click="delCart">确定</a>
+        <a class="btn btn--m" href="javascript:;" @click="modalConfirm=false">取消</a>
+      </div>
+    </modal>
     <nav-footer></nav-footer>
   </div>
 </template>
@@ -150,17 +157,47 @@
   })
   export default class Cart extends Vue {
     public cartList = []
-    public created(): void {
+    public productId: string = ''
+    public modalConfirm: boolean = false
+
+    public mounted(): void {
       this.getCartList()
     }
     public async getCartList() {
-      const result = (await this.axios.get('/users/cartList')).data
-      if (result.status === '0') {
-        this.cartList = result.result
+			const data = (await this.axios.get('/users/cartList')).data
+      if (data.status === '0') {
+				this.cartList = data.result
       } else {
         window.location.href = '/'
       }
     }
+    public delCartConfirm(productId: string): void {
+      this.productId = productId
+      this.modalConfirm = true
+    }
+    public closeModal(): void {
+      this.modalConfirm = false
+    }
+    public async delCart() {
+      const data = (await this.axios.post('/users/cart/del', {
+        productId: this.productId
+      })).data
+      if (data.status === '0') {
+        const i = this.cartList.findIndex(item => item.productId === this.productId)
+        this.cartList.splice(i, 1)
+      } else {
+        alert(data.msg)
+      }
+		}
+		public cartChecked(productId: string): void {
+			let cartItem = this.cartList.find(item => item.productId === productId)
+			cartItem.checked = cartItem.checked === 0 ? 1 : 0
+		}
+		public changeProductNum(productId: string, event: any): void {
+			const method = event.target.className
+			let cartItem = this.cartList.find(item => item.productId === productId)
+			cartItem.productNum = method === 'input-add' ? ++cartItem.productNum : --cartItem.productNum
+		}
   }
 </script>
 
@@ -187,4 +224,14 @@
     min-width: 30px;
     text-align: center;
   }
+	.v-enter-active, .v-leave-active {
+		transition: all .5s;
+	}
+	.v-enter, .v-leave-to {
+		opacity: 0;
+  	transform: translateY(-30px);
+	}
+	.list-complete-leave-active {
+		position: absolute;
+	}
 </style>
