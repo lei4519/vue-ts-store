@@ -58,8 +58,8 @@
                 <li>Edit</li>
               </ul>
             </div>
-            <transition-group tag="ul"  class="cart-item-list" mode="in-out">
-								<li v-for="item in cartList" :key="item._id">
+            <transition-group tag="ul"  class="cart-item-list">
+								<li v-for="item in cartList" :key="item._id" class="cartItem">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
                     <a href="javascipt:;" class="checkbox-btn item-check-btn" @click="cartChecked(item.productId)" :class="{'checked': item.checked === 0 ? false : true}">
@@ -224,14 +224,14 @@
     min-width: 30px;
     text-align: center;
   }
-	.v-enter-active, .v-leave-active {
-		transition: all .5s;
+	.cartItem {
+		transition: all 1s;
 	}
 	.v-enter, .v-leave-to {
 		opacity: 0;
-  	transform: translateY(-30px);
+		transform: translateY(-30px);
 	}
-	.list-complete-leave-active {
+	.v-leave-active {
 		position: absolute;
 	}
 </style>
