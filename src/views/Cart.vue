@@ -1,9 +1,5 @@
 <template>
   <div>
-    <nav-header></nav-header>
-    <nav-bread>
-      <span slot="bread">My Cart</span>
-    </nav-bread>
     <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1"
          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
@@ -58,11 +54,12 @@
                 <li>Edit</li>
               </ul>
             </div>
-            <transition-group tag="ul"  class="cart-item-list">
-								<li v-for="item in cartList" :key="item._id" class="cartItem">
+            <transition-group tag="ul" class="cart-item-list">
+              <li v-for="item in cartList" :key="item._id" class="cartItem">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn" @click="cartChecked(item.productId)" :class="{'checked': item.checked === 0 ? false : true}">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" @click="editCart('checked', item)"
+                       :class="{'checked': item.checked}">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -80,11 +77,11 @@
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
-                    <div class="select-self select-self-open">
-                      <div class="select-self-area" @click="changeProductNum(item.productId, $event)">
-                        <a class="input-sub">-</a>
+                    <div class="select-self select-self-open" style="user-select: none;">
+                      <div class="select-self-area">
+                        <a class="input-sub" @click="editCart('sub', item)">-</a>
                         <span class="select-ipt">{{ item.productNum }}</span>
-                        <a class="input-add">+</a>
+                        <a class="input-add" @click="editCart('add', item)">+</a>
                       </div>
                     </div>
                   </div>
@@ -102,15 +99,15 @@
                   </div>
                 </div>
               </li>
-						</transition-group>
+            </transition-group>
           </div>
         </div>
         <div class="cart-foot-wrap">
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
-              <div class="item-all-check">
+              <div class="item-all-check" @click="toggleCheckAll">
                 <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn">
+                  <span class="checkbox-btn item-check-btn" :class="{'checked': checkAllFlag}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -119,10 +116,12 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">500</span>
+                Item total: <span class="total-price">{{ itemTotal }}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red">Checkout</a>
+                <a class="btn btn--red" :class="{'btn--dis': !nothingSelected}"
+                   @click="checkOut">Checkout
+                </a>
               </div>
             </div>
           </div>
@@ -136,73 +135,113 @@
         <a class="btn btn--m" href="javascript:;" @click="modalConfirm=false">取消</a>
       </div>
     </modal>
-    <nav-footer></nav-footer>
   </div>
 </template>
 
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
-  import NavHeader from '@/components/NavHeader.vue'
-  import NavFooter from '@/components/NavFooter.vue'
-  import NavBread from '@/components/NavBread.vue'
   import Modal from '@/components/Modal.vue'
 
   @Component({
     components: {
-      NavHeader,
-      NavFooter,
-      NavBread,
       Modal
     }
   })
   export default class Cart extends Vue {
-    public cartList = []
+    public cartList = [] as any
     public productId: string = ''
     public modalConfirm: boolean = false
-
     public mounted(): void {
       this.getCartList()
     }
+    public created() {
+      this.$emit('changeBreadText', 'My Cart')
+    }
     public async getCartList() {
-			const data = (await this.axios.get('/users/cartList')).data
+      const data = (await this.axios.get('/users/cartList')).data
       if (data.status === '0') {
-				this.cartList = data.result
+        this.cartList = data.result
       } else {
         window.location.href = '/'
       }
     }
+
     public delCartConfirm(productId: string): void {
       this.productId = productId
       this.modalConfirm = true
     }
+
     public closeModal(): void {
       this.modalConfirm = false
     }
+
     public async delCart() {
-      const data = (await this.axios.post('/users/cart/del', {
+      const data = (await this.axios.post('/users/cartDel', {
         productId: this.productId
       })).data
       if (data.status === '0') {
-        const i = this.cartList.findIndex(item => item.productId === this.productId)
+        const i = this.cartList.findIndex((item: any) => item.productId === this.productId)
         this.cartList.splice(i, 1)
+        this.modalConfirm = false
       } else {
         alert(data.msg)
       }
-		}
-		public cartChecked(productId: string): void {
-			let cartItem = this.cartList.find(item => item.productId === productId)
-			cartItem.checked = cartItem.checked === 0 ? 1 : 0
-		}
-		public changeProductNum(productId: string, event: any): void {
-			const method = event.target.className
-			let cartItem = this.cartList.find(item => item.productId === productId)
-			cartItem.productNum = method === 'input-add' ? ++cartItem.productNum : --cartItem.productNum
-		}
+    }
+
+    public cartChecked(productId: string): void {
+      const cartItem = this.cartList.find((item: any) => item.productId === productId)
+    }
+
+    public editCart(flag: string, item: any) {
+      if (flag === 'sub') {
+        if (item.productNum <= 1) {
+          return
+        }
+        item.productNum--
+      } else if (flag === 'add') {
+        item.productNum++
+      } else if (flag === 'checked') {
+        item.checked = item.checked === 0 ? 1 : 0
+      }
+      this.axios.post('/users/cartEdit', {
+        productId: item.productId,
+        productNum: item.productNum,
+        checked: item.checked
+      })
+    }
+    public toggleCheckAll(): void {
+      const checked = this.checkAllFlag ? 0 : 1
+      this.cartList.forEach((item: any) => item.checked = checked)
+      this.axios.post('/users/editCheckAll', {
+        checked
+      })
+    }
+    public checkOut(): any {
+      if (!this.nothingSelected) {
+        return false
+      }
+      this.$router.push('/address')
+    }
+    public get checkAllFlag(): boolean {
+      return this.cartList.every((item: any) => item.checked === 1)
+    }
+    public get nothingSelected(): boolean {
+      return this.cartList.some((item: any) => item.checked === 1)
+    }
+    public get itemTotal(): number {
+      let total = 0
+      this.cartList.forEach((item: any) => {
+        if (item.checked === 1) {
+          total += item.salePrice * item.productNum
+        }
+      })
+      return total
+    }
   }
 </script>
 
 <style lang="scss" scoped>
-  .input-sub,.input-add{
+  .input-sub, .input-add {
     min-width: 40px;
     height: 100%;
     border: 0;
@@ -213,25 +252,30 @@
     display: inline-block;
     background: #f0f0f0;
   }
-  .item-quantity .select-self-area{
-    background:none;
+
+  .item-quantity .select-self-area {
+    background: none;
     border: 1px solid #f0f0f0;
   }
-  .item-quantity .select-self-area .select-ipt{
+
+  .item-quantity .select-self-area .select-ipt {
     display: inline-block;
-    padding:0 3px;
+    padding: 0 3px;
     width: 30px;
     min-width: 30px;
     text-align: center;
   }
-	.cartItem {
-		transition: all 1s;
-	}
-	.v-enter, .v-leave-to {
-		opacity: 0;
-		transform: translateY(-30px);
-	}
-	.v-leave-active {
-		position: absolute;
-	}
+
+  .cartItem {
+    transition: all 1s;
+  }
+
+  .v-enter, .v-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  .v-leave-active {
+    position: absolute;
+  }
 </style>

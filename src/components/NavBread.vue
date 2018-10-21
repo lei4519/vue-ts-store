@@ -4,7 +4,7 @@
             <div class="container">
                 <nav class="nav-breadcrumb">
                     <a href="/">Home</a>
-                    <slot name="bread"></slot>
+                    <span>{{ breadText }}</span>
                 </nav>
             </div>
         </div>
@@ -12,8 +12,9 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component } from 'vue-property-decorator'
+  import { Vue, Component, Prop } from 'vue-property-decorator'
   @Component
   export default class NavBread extends Vue {
+    @Prop() public breadText!: string
   }
 </script>

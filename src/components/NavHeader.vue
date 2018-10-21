@@ -25,7 +25,7 @@
             <a href="javascript:void(0)" class="navbar-link" v-if="nickName" @click="logout">Logout</a>
             <div class="navbar-cart-container">
               <span class="navbar-cart-count"></span>
-              <a class="navbar-link navbar-cart-link" href="/#/cart">
+              <a class="navbar-link navbar-cart-link" href="/cart">
                 <svg class="navbar-cart-logo">
                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
                 </svg>
@@ -46,7 +46,7 @@
             </li>
             <li class="regi_form_input noMargin">
               <i class="icon IconPwd"></i>
-              <input type="password" tabindex="2" name="password" v-model="userPwd"
+              <input type="password" tabindex="2" name="password" v-model="userPwd" @keyup.enter="login"
                      class="regi_login_input regi_login_input_left login-input-no input_text"
                      placeholder="Password">
             </li>
@@ -56,7 +56,7 @@
           </div>
         </div>
         <div slot="btnGroup">
-          <a href="javascript:;" class="btn-login" @click="login()" tabindex="3">登 录</a>
+          <a href="javascript:;" class="btn-login" @click="login" tabindex="3">登 录</a>
         </div>
       </modal>
       <div class="logoutOverlay" v-if="logoutMsg">

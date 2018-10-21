@@ -1,7 +1,5 @@
 <template>
   <div>
-    <nav-header></nav-header>
-    <nav-bread><span slot="bread">Goods</span></nav-bread>
     <div class="accessory-result-page accessory-page">
       <div class="container">
         <div class="filter-nav">
@@ -81,22 +79,15 @@
         <router-link to="/cart" class="btn btn--m">查看购物车</router-link>
       </div>
     </modal>
-    <nav-footer></nav-footer>
   </div>
 </template>
 
 <script lang="ts">
   import { Component, Watch, Vue } from 'vue-property-decorator'
-  import NavHeader from '@/components/NavHeader.vue'
-  import NavFooter from '@/components/NavFooter.vue'
-  import NavBread from '@/components/NavBread.vue'
   import Modal from '@/components/Modal.vue'
 
   @Component({
     components: {
-      NavHeader,
-      NavFooter,
-      NavBread,
       Modal
     }
   })
@@ -149,6 +140,7 @@
     }
 
     public async created() {
+      this.$emit('changeBreadText', 'Goods')
       this.getGoodsList()
     }
 
