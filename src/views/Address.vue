@@ -67,7 +67,8 @@
         <div class="addr-list-wrap">
           <div class="addr-list">
             <ul>
-              <li v-for="item in addressList" :key="item.addressId">
+              <li v-for="(item, i) in addressListFilter" :key="item.addressId" :class="{'check': checkIndex === i}"
+                  @click="checkIndex = i">
                 <dl>
                   <dt>{{ item.userName }}</dt>
                   <dd class="address">{{ item.streetName }}</dd>
@@ -81,9 +82,10 @@
                   </a>
                 </div>
                 <div class="addr-opration addr-set-default">
-                  <a href="javascript:;" class="addr-set-default-btn"><i>Set default</i></a>
+                  <a href="javascript:;" class="addr-set-default-btn" v-show="!item.isDefault"
+                     @click="setDefault(item.addressId)"><i>Set default</i></a>
                 </div>
-                <div class="addr-opration" :class="{'addr-default': item.isDefault}">Default address</div>
+                <div class="addr-opration addr-default" v-show="item.isDefault">Default address</div>
               </li>
               <li class="addr-new" @click="addAddressModal=true">
                 <div class="add-new-inner">
@@ -99,7 +101,8 @@
           </div>
 
           <div class="shipping-addr-more">
-            <a class="addr-more-btn up-down-btn" href="javascript:;">
+            <a class="addr-more-btn up-down-btn" href="javascript:;" :class="{'open': limit > 3}"
+               @click="limit=limit>=addressList.length?3:addressList.length">
               more
               <i class="i-up-down">
                 <i class="i-up-down-l"></i>
@@ -164,7 +167,9 @@
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
   import Modal from '@/components/Modal.vue'
-
+  interface AddressInfo {
+    [name: string]: any
+  }
   @Component({
     components: {
       Modal
@@ -173,13 +178,15 @@
   export default class Address extends Vue {
     public addressList = [] as any
     public addAddressModal: boolean = false
-    public addressInfo = {
-      addressId: "",
-      userName: "",
-      streetName: "",
-      postCode: "",
-      tel: "",
-      isDefault: false
+    public limit: number = 3
+    public checkIndex: number = 0
+    public addressInfo: AddressInfo = {
+      addressId: '',
+      userName: '',
+      streetName: '',
+      postCode: '',
+      tel: '',
+      isDefault: true
     }
     public created() {
       this.$emit('changeBreadText', 'My Address')
@@ -194,11 +201,9 @@
       }
     }
     public async addAddress() {
-      for(let item in this.addressInfo) {
-        if (item !== 'addressId' && item !== 'isDefault') {
-          if (!Boolean(this.addressInfo[item])) {
+      for (const item in this.addressInfo) {
+        if (item !== 'addressId' && item !== 'isDefault' && !Boolean(this.addressInfo[item])) {
             return
-          }
         }
       }
       this.addressInfo.addressId = `${Date.now()}`
@@ -214,6 +219,17 @@
     }
     public closeModal() {
       this.addAddressModal = false
+    }
+    public async setDefault(addressId: string): void {
+      const response = (await this.axios.post('/users/setDefault', {
+        addressId
+      })).data
+      if (response.status !== '0') {
+        alert(response.msg)
+      }
+    }
+    public get addressListFilter() {
+      return this.addressList.slice(0, this.limit)
     }
   }
 </script>

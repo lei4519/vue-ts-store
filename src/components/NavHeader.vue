@@ -123,8 +123,7 @@
         this.nickName = result.result.userName
       } else {
         if (window.location.href !== 'http://localhost:8080/') {
-          // TODO: test
-          // window.location.href = '/'
+          window.location.href = '/'
         }
       }
     }

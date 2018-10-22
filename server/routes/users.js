@@ -209,4 +209,35 @@ router.post('/login', async (req, res) => {
       })
     }
   })
+  .post('/setDefault', async (req, res) => {
+    try {
+      if (req.cookies.userId) {
+        const addressId = req.body.addressId
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
+        addressListDoc.addressList.forEach(item => {
+          item.addressId = (item.addressId === addressId)
+        })
+        await addressListDoc.save()
+        res.json({
+          status: '0',
+          msg: '',
+          result: '设置成功'
+        })
+      } else {
+        res.json({
+          status: '1',
+          msg: '设置失败',
+          result: ''
+        })
+      }
+    } catch (err) {
+      res.json({
+        status: '1',
+        msg: err.message,
+        result: ''
+      })
+    }
+  })
 module.exports = router
