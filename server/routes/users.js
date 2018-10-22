@@ -252,13 +252,62 @@ router.post('/login', async (req, res) => {
         const addressListDoc = await User.findOne({
           userId: req.cookies.userId,
         })
-        let delAddressIndex = addressListDoc.addressList.findIndex(item => item.addressId === addressId)
+        const delAddressIndex = addressListDoc.addressList.findIndex(item => item.addressId === addressId)
         addressListDoc.addressList.splice(delAddressIndex, 1)
         await addressListDoc.save()
         res.json({
           status: '0',
           msg: '',
           result: '删除成功'
+        })
+      } else {
+        res.json({
+          status: '1001',
+          msg: '未登录',
+          result: ''
+        })
+      }
+    } catch (err) {
+      res.json({
+        status: '1',
+        msg: err.message,
+        result: ''
+      })
+    }
+  })
+  .get('/checkedCartList', async (req, res) => {
+    try {
+      if (req.cookies.userId) {
+        const cartListDoc = await User.findOne({userId: req.cookies.userId})
+        let checkedCartList = cartListDoc.cartList.filter(item => item.checked === 1)
+        res.json({
+          status: '0',
+          msg: '',
+          result: checkedCartList
+        })
+      } else {
+        res.json({
+          status: '1001',
+          msg: '未登录',
+          result: ''
+        })
+      }
+    } catch (err) {
+      res.json({
+        status: '1',
+        msg: err.message,
+        result: ''
+      })
+    }
+  })
+  .get('/orderList', async (req, res) => {
+    try {
+      if (req.cookies.userId) {
+        const orderListDoc = await User.findOne({userId: req.cookies.userId})
+        res.json({
+          status: '0',
+          msg: '',
+          result: orderListDoc.orderList
         })
       } else {
         res.json({

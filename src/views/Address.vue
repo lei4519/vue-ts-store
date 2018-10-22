@@ -133,7 +133,7 @@
           </div>
         </div>
         <div class="next-btn-wrap">
-          <a class="btn btn--m btn--red">Next</a>
+          <router-link to="/orderConfirm" class="btn btn--m btn--red">Next</router-link>
         </div>
       </div>
     </div>
@@ -220,9 +220,8 @@
         addressInfo: this.addressInfo
       })).data
       if (response.status === '0') {
-        this.$nextTick(() => {
-          this.addressList.push(this.addressInfo)
-        })
+        this.addressList.push(this.addressInfo)
+        this.limit = this.addressList.length
         this.addAddressModal = false
       } else {
         alert(response.msg)
@@ -249,10 +248,8 @@
         addressId: this.delAddressId
       })).data
       if (response.status === '0') {
-        this.$nextTick(() => {
-            this.addressList.splice(this.delAddressId, 1)
-          }
-        )
+        const delAddressIndex = this.addressList.findIndex((item: any) => item.addressId === this.delAddressId)
+        this.addressList.splice(delAddressIndex, 1)
         this.delAddressModel = false
       } else {
         alert(response.msg)
