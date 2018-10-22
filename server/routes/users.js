@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
         })
       } else {
         res.json({
-          status: '1',
+          status: '1001',
           msg: '未登录',
           result: ''
         })
@@ -168,7 +168,7 @@ router.post('/login', async (req, res) => {
         })
       } else {
         res.json({
-          status: '1',
+          status: '1001',
           msg: '未登录',
           result: ''
         })
@@ -196,8 +196,8 @@ router.post('/login', async (req, res) => {
         })
       } else {
         res.json({
-          status: '1',
-          msg: '添加失败',
+          status: '1001',
+          msg: '未登录',
           result: ''
         })
       }
@@ -215,15 +215,15 @@ router.post('/login', async (req, res) => {
         const addressId = req.body.addressId
         const addressListDoc = await User.findOne({
           userId: req.cookies.userId,
-				})
-				let defaultIndex = 0
+        })
+        let defaultIndex = 0
         addressListDoc.addressList.forEach((item, i) => {
-					item.isDefault = (item.addressId === addressId)
-					if (item.addressId === addressId) {
-						defaultIndex = i
-					}
-				})
-				addressListDoc.addressList.unshift(addressListDoc.addressList.splice(defaultIndex, 1)[0])
+          item.isDefault = (item.addressId === addressId)
+          if (item.addressId === addressId) {
+            defaultIndex = i
+          }
+        })
+        addressListDoc.addressList.unshift(addressListDoc.addressList.splice(defaultIndex, 1)[0])
         await addressListDoc.save()
         res.json({
           status: '0',
@@ -232,8 +232,38 @@ router.post('/login', async (req, res) => {
         })
       } else {
         res.json({
-          status: '1',
-          msg: '设置失败',
+          status: '1001',
+          msg: '未登录',
+          result: ''
+        })
+      }
+    } catch (err) {
+      res.json({
+        status: '1',
+        msg: err.message,
+        result: ''
+      })
+    }
+  })
+  .post('/delAddress', async (req, res) => {
+    try {
+      if (req.cookies.userId) {
+        const addressId = req.body.addressId
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
+        let delAddressIndex = addressListDoc.addressList.findIndex(item => item.addressId === addressId)
+        addressListDoc.addressList.splice(delAddressIndex, 1)
+        await addressListDoc.save()
+        res.json({
+          status: '0',
+          msg: '',
+          result: '删除成功'
+        })
+      } else {
+        res.json({
+          status: '1001',
+          msg: '未登录',
           result: ''
         })
       }

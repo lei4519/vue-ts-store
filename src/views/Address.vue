@@ -75,7 +75,7 @@
                   <dd class="tel">{{ item.tel }}</dd>
                 </dl>
                 <div class="addr-opration addr-del">
-                  <a href="javascript:;" class="addr-del-btn">
+                  <a href="javascript:;" class="addr-del-btn" @click="delAddressModel=true;delAddressId=item.addressId">
                     <svg class="icon icon-del">
                       <use xlink:href="#icon-del"></use>
                     </svg>
@@ -161,6 +161,13 @@
         <a href="javascript:;" class="btn btn--m" @click="addAddress">确认添加</a>
       </div>
     </modal>
+    <modal :mdShow="delAddressModel" @closeModal="closeModal">
+      <p slot="message">您确定删除此地址吗?</p>
+      <div slot="btnGroup">
+        <a href="javascript:;" class="btn btn--m" @click="delAddress">删除</a>
+        <a href="javascript:;" class="btn btn--m" @click="delAddressModel=false">取消</a>
+      </div>
+    </modal>
   </div>
 </template>
 
@@ -180,6 +187,8 @@
     public addAddressModal: boolean = false
     public limit: number = 3
     public checkIndex: number = 0
+    public delAddressModel: boolean = false
+    public delAddressId: string = ''
     public addressInfo: AddressInfo = {
       addressId: '',
       userName: '',
@@ -211,14 +220,17 @@
         addressInfo: this.addressInfo
       })).data
       if (response.status === '0') {
+        this.$nextTick(() => {
+          this.addressList.push(this.addressInfo)
+        })
         this.addAddressModal = false
-        this.addressList.push(this.addressInfo)
       } else {
         alert(response.msg)
       }
     }
     public closeModal() {
       this.addAddressModal = false
+      this.delAddressModel = false
     }
     public async setDefault(addressId: string) {
       const response = (await this.axios.post('/users/setDefault', {
@@ -228,6 +240,20 @@
         this.addressList.forEach((item: any) => {
           item.isDefault = (item.addressId === addressId)
         })
+      } else {
+        alert(response.msg)
+      }
+    }
+    public async delAddress() {
+      const response = (await this.axios.post('/users/delAddress', {
+        addressId: this.delAddressId
+      })).data
+      if (response.status === '0') {
+        this.$nextTick(() => {
+            this.addressList.splice(this.delAddressId, 1)
+          }
+        )
+        this.delAddressModel = false
       } else {
         alert(response.msg)
       }
