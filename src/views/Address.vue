@@ -186,7 +186,7 @@
       streetName: '',
       postCode: '',
       tel: '',
-      isDefault: true
+      isDefault: false
     }
     public created() {
       this.$emit('changeBreadText', 'My Address')
@@ -220,11 +220,15 @@
     public closeModal() {
       this.addAddressModal = false
     }
-    public async setDefault(addressId: string): void {
+    public async setDefault(addressId: string) {
       const response = (await this.axios.post('/users/setDefault', {
         addressId
       })).data
-      if (response.status !== '0') {
+      if (response.status === '0') {
+        this.addressList.forEach((item: any) => {
+          item.isDefault = (item.addressId === addressId)
+        })
+      } else {
         alert(response.msg)
       }
     }

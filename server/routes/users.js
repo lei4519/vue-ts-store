@@ -215,10 +215,15 @@ router.post('/login', async (req, res) => {
         const addressId = req.body.addressId
         const addressListDoc = await User.findOne({
           userId: req.cookies.userId,
-        })
-        addressListDoc.addressList.forEach(item => {
-          item.addressId = (item.addressId === addressId)
-        })
+				})
+				let defaultIndex = 0
+        addressListDoc.addressList.forEach((item, i) => {
+					item.isDefault = (item.addressId === addressId)
+					if (item.addressId === addressId) {
+						defaultIndex = i
+					}
+				})
+				addressListDoc.addressList.unshift(addressListDoc.addressList.splice(defaultIndex, 1)[0])
         await addressListDoc.save()
         res.json({
           status: '0',
