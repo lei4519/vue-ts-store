@@ -19,11 +19,12 @@ router.post('/login', async (req, res) => {
       maxAge: 1000 * 60 * 60
     })
     if (doc) {
+			const cartCount = doc.cartList.reduce((acc, cur) => acc + Number(cur.productNum), 0)
       res.json({
         status: '0',
         msg: '',
 				userName: doc.userName,
-				cartCount: doc.cartList.length
+				cartCount
       })
     } else {
       res.json({
@@ -58,13 +59,14 @@ router.post('/login', async (req, res) => {
     if (req.cookies.userId) {
 			const cartListDoc = await User.findOne({
           userId: req.cookies.userId,
-        })
+				})
+			const cartCount = cartListDoc.cartList.reduce((acc, cur) => acc + Number(cur.productNum), 0)
       res.json({
         status: '0',
         msg: '',
         result: {
 					userName: req.cookies.userName || '',
-					cartCount: cartListDoc.cartList.length
+					cartCount
         }
       })
     } else {
@@ -326,7 +328,12 @@ router.post('/login', async (req, res) => {
           result: ''
         })
 				}
-				const goodsList = userDoc.cartList.filter(item => item.checked === 1)
+				const goodsList = []
+				userDoc.cartList.forEach((item, i, arr) => {
+					if (item.checked === 1) {
+						goodsList.push(arr.splice(i, 1)[0])
+					}
+				})
 				if (!goodsList) {
 					res.json({
           status: '1',

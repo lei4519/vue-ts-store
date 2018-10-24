@@ -12,9 +12,11 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop } from 'vue-property-decorator'
+	import { Vue, Component, Prop } from 'vue-property-decorator'
+	import { State } from "vuex-class"
+
   @Component
   export default class NavBread extends Vue {
-    @Prop() public breadText!: string
+		@State public breadText: any
   }
 </script>

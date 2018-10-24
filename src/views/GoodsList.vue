@@ -85,6 +85,7 @@
 <script lang="ts">
   import { Component, Watch, Vue } from 'vue-property-decorator'
   import Modal from '@/components/Modal.vue'
+	import { State, Mutation } from "vuex-class"
 
   @Component({
     components: {
@@ -92,6 +93,9 @@
     }
   })
   export default class GoodsList extends Vue {
+		@State public cartCount: any
+		@Mutation public updateCartCount: any
+		@Mutation public changeBreadText: any
     public goodsList = []
     public priceFilter = [
       {
@@ -140,7 +144,7 @@
     }
 
     public async created() {
-      this.$emit('changeBreadText', 'Goods')
+      this.changeBreadText('Goods')
 			this.getGoodsList()
 		}
 		
@@ -202,7 +206,8 @@
         productId
       })).data
       if (data.status === '0') {
-        this.mdShowCart = true
+				this.mdShowCart = true
+				this.updateCartCount(this.cartCount+1)
       } else {
         this.mdShow = true
       }

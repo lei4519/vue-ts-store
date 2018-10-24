@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav-header></nav-header>
-    <nav-bread :breadText="breadText"></nav-bread>
+    <nav-bread></nav-bread>
     <router-view @changeBreadText="changeBreadText"></router-view>
     <nav-footer></nav-footer>
   </div>
@@ -21,9 +21,5 @@
     }
   })
   export default class Cart extends Vue {
-    public breadText: string = ''
-    public changeBreadText(text: string): void {
-      this.breadText = text
-    }
   }
 </script>

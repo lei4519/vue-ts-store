@@ -174,6 +174,8 @@
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
   import Modal from '@/components/Modal.vue'
+	import { Mutation } from 'vuex-class'
+	
   interface AddressInfo {
     [name: string]: any
   }
@@ -183,6 +185,7 @@
     }
   })
   export default class Address extends Vue {
+		@Mutation public changeBreadText: any
     public addressList = [] as any
     public addAddressModal: boolean = false
     public limit: number = 3
@@ -199,13 +202,18 @@
       isDefault: false
     }
     public created() {
-      this.$emit('changeBreadText', 'My Address')
+      this.changeBreadText('My Address')
       this.getAddressList()
     }
     public async getAddressList() {
       const response = (await this.axios.get('/users/addressList')).data
       if (response.status === '0') {
-        this.addressList = response.result
+				this.addressList = response.result
+				this.addressList.some((item: any) => {
+					if (item.isDefault) {
+						this.selectedAddressId = item.addressId
+					}
+				})
       } else {
         alert(response.msg)
       }

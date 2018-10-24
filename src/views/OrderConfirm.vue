@@ -134,9 +134,12 @@
 
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
-
+	import { State, Mutation } from 'vuex-class'
   @Component
   export default class OrderConfirm extends Vue {
+		@State public cartCount: any
+		@Mutation public updateCartCount: any
+		@Mutation public changeBreadText: any
 		public cartList = [] as any
 		public price = {
 			shipping: 100,
@@ -145,7 +148,7 @@
 		}
 
     public created() {
-      this.$emit('changeBreadText', 'Order Confirm')
+      this.changeBreadText('Order Confirm')
 			this.getCartList()
     }
 
@@ -167,6 +170,8 @@
 				addressId
 			})).data
 			if (response.status === '0') {
+				const checkedCount = this.cartList.reduce((acc: any, cur: any) => acc + cur.productNum, 0)
+				this.updateCartCount(this.cartCount - checkedCount)
 				this.$router.push({
 					path: '/orderSuccess',
 					query: {

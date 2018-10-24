@@ -38,11 +38,12 @@
 
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
-
+	import { Mutation } from "vuex-class"
   @Component
   export default class OrderSuccess extends Vue {
+		@Mutation public changeBreadText: any
     public created() {
-      this.$emit('changeBreadText', 'Order Success')
+      this.changeBreadText('Order Success')
     }
   }
 </script>

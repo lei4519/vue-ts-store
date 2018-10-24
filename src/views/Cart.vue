@@ -58,7 +58,7 @@
               <li v-for="item in cartList" :key="item._id" class="cartItem">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn" @click="editCart('checked', item)"
+                    <a href="javascipt:void(0);" class="checkbox-btn item-check-btn" @click.prevent="editCart('checked', item)"
                        :class="{'checked': item.checked}">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
@@ -79,9 +79,9 @@
                   <div class="item-quantity">
                     <div class="select-self select-self-open" style="user-select: none;">
                       <div class="select-self-area">
-                        <a class="input-sub" @click="editCart('sub', item)">-</a>
+                        <a class="input-sub" @click.prevent="editCart('sub', item)">-</a>
                         <span class="select-ipt">{{ item.productNum }}</span>
-                        <a class="input-add" @click="editCart('add', item)">+</a>
+                        <a class="input-add" @click.prevent="editCart('add', item)">+</a>
                       </div>
                     </div>
                   </div>
@@ -91,7 +91,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" class="item-edit-btn" @click="delCartConfirm(item.productId)">
+                    <a href="javascript:;" class="item-edit-btn" @click.prevent="delCartConfirm(item.productId)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -105,7 +105,7 @@
         <div class="cart-foot-wrap">
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
-              <div class="item-all-check" @click="toggleCheckAll">
+              <div class="item-all-check" @click.prevent="toggleCheckAll">
                 <a href="javascipt:;">
                   <span class="checkbox-btn item-check-btn" :class="{'checked': checkAllFlag}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
@@ -120,7 +120,7 @@
               </div>
               <div class="btn-wrap">
                 <a class="btn btn--red" :class="{'btn--dis': !nothingSelected}"
-                   @click="checkOut">Checkout
+                   @click.prevent="checkOut">Checkout
                 </a>
               </div>
             </div>
@@ -131,8 +131,8 @@
     <modal :mdShow="modalConfirm" @closeModal="closeModal">
       <p slot="message">您确定删除这件商品吗?</p>
       <div slot="btnGroup">
-        <a class="btn btn--m" href="javascript:;" @click="delCart">确定</a>
-        <a class="btn btn--m" href="javascript:;" @click="modalConfirm=false">取消</a>
+        <a class="btn btn--m" href="javascript:;" @click.prevent="delCart">确定</a>
+        <a class="btn btn--m" href="javascript:;" @click.prevent="modalConfirm=false">取消</a>
       </div>
     </modal>
   </div>
@@ -141,6 +141,7 @@
 <script lang="ts">
   import { Vue, Component } from 'vue-property-decorator'
   import Modal from '@/components/Modal.vue'
+	import { State, Mutation } from "vuex-class"
 
   @Component({
     components: {
@@ -148,6 +149,9 @@
     }
   })
   export default class Cart extends Vue {
+		@State public cartCount: any
+		@Mutation public updateCartCount: any
+		@Mutation public changeBreadText: any
     public cartList = [] as any
     public productId: string = ''
     public modalConfirm: boolean = false
@@ -155,7 +159,7 @@
       this.getCartList()
     }
     public created() {
-      this.$emit('changeBreadText', 'My Cart')
+      this.changeBreadText('My Cart')
     }
     public async getCartList() {
       const data = (await this.axios.get('/users/cartList')).data
@@ -181,15 +185,12 @@
       })).data
       if (data.status === '0') {
         const i = this.cartList.findIndex((item: any) => item.productId === this.productId)
-        this.cartList.splice(i, 1)
-        this.modalConfirm = false
+        const delCartItem = this.cartList.splice(i, 1)[0]
+				this.modalConfirm = false
+				this.updateCartCount(this.cartCount-delCartItem.productNum)
       } else {
         alert(data.msg)
       }
-    }
-
-    public cartChecked(productId: string): void {
-      const cartItem = this.cartList.find((item: any) => item.productId === productId)
     }
 
     public editCart(flag: string, item: any) {
@@ -197,9 +198,11 @@
         if (item.productNum <= 1) {
           return
         }
-        item.productNum--
+				item.productNum--
+				this.updateCartCount(this.cartCount-1)
       } else if (flag === 'add') {
-        item.productNum++
+				item.productNum++
+				this.updateCartCount(this.cartCount+1)
       } else if (flag === 'checked') {
         item.checked = item.checked === 0 ? 1 : 0
       }
