@@ -4,3 +4,5 @@ declare module '*.vue' {
 }
 
 declare module 'vue-infinite-scroll'
+
+declare module '@/util/currency.js'

@@ -71,7 +71,7 @@
                     </div>
                   </div>
                   <div class="cart-tab-2">
-                    <div class="item-price">{{ item.salePrice }}</div>
+                    <div class="item-price">{{ item.salePrice | currency('$') }}</div>
                   </div>
                   <div class="cart-tab-3">
                     <div class="item-quantity">
@@ -84,7 +84,7 @@
                     </div>
                   </div>
                   <div class="cart-tab-4">
-                    <div class="item-price-total">${{ item.productNum * item.salePrice }}</div>
+                    <div class="item-price-total">{{ (item.productNum * item.salePrice) | currency('$') }}</div>
                   </div>
                 </li>
               </ul>
@@ -97,23 +97,23 @@
               <ul>
                 <li>
                   <span>Item subtotal:</span>
-                  <span>${{ orderTotal }}</span>
+                  <span>{{ subTotal | currency('$') }}</span>
                 </li>
                 <li>
                   <span>Shipping:</span>
-                  <span>$100</span>
+                  <span>{{ price.shipping | currency('$') }}</span>
                 </li>
                 <li>
                   <span>Discount:</span>
-                  <span>$0</span>
+                  <span>{{ price.discount | currency('$') }}</span>
                 </li>
                 <li>
                   <span>Tax:</span>
-                  <span>$400</span>
+                  <span>{{ price.tax | currency('$') }}</span>
                 </li>
                 <li class="order-total-price">
                   <span>Order total:</span>
-                  <span>${{ orderTotal + 100 + 400 }}</span>
+                  <span>{{ orderTotal | currency('$') }}</span>
                 </li>
               </ul>
             </div>
@@ -124,7 +124,7 @@
               <button class="btn btn--m" @click="$router.go(-1)">Previous</button>
             </div>
             <div class="next-btn-wrap">
-              <router-link to="/orderSuccess" class="btn btn--m btn--red">Proceed to payment</router-link>
+              <a @click="payMent" class="btn btn--m btn--red">Proceed to payment</a>
             </div>
           </div>
         </div>
@@ -137,11 +137,16 @@
 
   @Component
   export default class OrderConfirm extends Vue {
-    public cartList = [] as any
+		public cartList = [] as any
+		public price = {
+			shipping: 100,
+			discount: 200,
+			tax: 400,
+		}
 
     public created() {
-      this.getCartList()
       this.$emit('changeBreadText', 'Order Confirm')
+			this.getCartList()
     }
 
     public async getCartList() {
@@ -151,10 +156,33 @@
       } else {
         alert(response.msg)
       }
-    }
-
+		}
+		public async payMent() {
+			const addressId = this.$route.query.addressId
+			if (!addressId) {
+				return alert('缺少必要参数')
+			}
+			const response = (await this.axios.post('/users/payMent', {
+				orderTotal: this.orderTotal,
+				addressId
+			})).data
+			if (response.status === '0') {
+				this.$router.push({
+					path: '/orderSuccess',
+					query: {
+						orderId: response.result.orderId,
+						orderTotal: response.result.orderTotal
+					}
+				})
+			} else {
+				alert(response.msg)
+			}
+		}
+		public get subTotal(): number {
+			return this.cartList.reduce((acc: any, cur: any) => acc + (cur.productNum * cur.salePrice), 0)
+		}
     public get orderTotal(): number {
-      return this.cartList.reduce((acc: any, cur: any) => acc + (cur.productNum * cur.salePrice), 0)
+			return (this.price.shipping + this.price.tax + this.subTotal - this.price.discount)
     }
   }
 </script>

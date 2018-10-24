@@ -5,12 +5,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-
+    cartCount: 0
   },
   mutations: {
-
-  },
-  actions: {
-
-  },
+    updateCartCount(state: any, count: number) {
+      state.cartCount = count
+    }
+  }
 });

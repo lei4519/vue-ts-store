@@ -68,7 +68,7 @@
           <div class="addr-list">
             <ul>
               <li v-for="(item, i) in addressListFilter" :key="item.addressId" :class="{'check': checkIndex === i}"
-                  @click="checkIndex = i">
+                  @click="checkIndex = i;selectedAddressId=item.addressId">
                 <dl>
                   <dt>{{ item.userName }}</dt>
                   <dd class="address">{{ item.streetName }}</dd>
@@ -133,7 +133,7 @@
           </div>
         </div>
         <div class="next-btn-wrap">
-          <router-link to="/orderConfirm" class="btn btn--m btn--red">Next</router-link>
+          <router-link :to="{path: 'orderConfirm', query: {'addressId': selectedAddressId}}" class="btn btn--m btn--red">Next</router-link>
         </div>
       </div>
     </div>
@@ -187,6 +187,7 @@
     public addAddressModal: boolean = false
     public limit: number = 3
     public checkIndex: number = 0
+    public selectedAddressId: string = ''
     public delAddressModel: boolean = false
     public delAddressId: string = ''
     public addressInfo: AddressInfo = {

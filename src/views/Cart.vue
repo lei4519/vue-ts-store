@@ -73,7 +73,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">{{ item.salePrice * item.productNum }}</div>
+                  <div class="item-price">{{ (item.salePrice * item.productNum)  | currency('$') }}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
@@ -116,7 +116,7 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">{{ itemTotal }}</span>
+                Item total: <span class="total-price">{{ itemTotal | currency('$') }}</span>
               </div>
               <div class="btn-wrap">
                 <a class="btn btn--red" :class="{'btn--dis': !nothingSelected}"

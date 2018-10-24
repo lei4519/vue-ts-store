@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/users')
+require('../util/util')
 
 router.post('/login', async (req, res) => {
   try {
@@ -21,7 +22,8 @@ router.post('/login', async (req, res) => {
       res.json({
         status: '0',
         msg: '',
-        userName: doc.userName
+				userName: doc.userName,
+				cartCount: doc.cartList.length
       })
     } else {
       res.json({
@@ -52,13 +54,17 @@ router.post('/login', async (req, res) => {
       result: ''
     })
   })
-  .get('/checkLogin', (req, res) => {
+  .get('/checkLogin', async (req, res) => {
     if (req.cookies.userId) {
+			const cartListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
       res.json({
         status: '0',
         msg: '',
         result: {
-          userName: req.cookies.userName || ''
+					userName: req.cookies.userName || '',
+					cartCount: cartListDoc.cartList.length
         }
       })
     } else {
@@ -300,14 +306,53 @@ router.post('/login', async (req, res) => {
       })
     }
   })
-  .get('/orderList', async (req, res) => {
+  .post('/payMent', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const orderListDoc = await User.findOne({userId: req.cookies.userId})
+				const platfrom = '622'
+				const r1 = Math.floor(Math.random() * 10)
+				const r2 = Math.floor(Math.random() * 10)
+				const sysDate = new Date().Format('yyyyMMddhhmmss')
+				const createDate = new Date().Format('yyyy-MM-dd hh:mm:ss')
+				const orderId = platfrom + r1 + sysDate + r2
+				const orderTotal = req.body.orderTotal
+				const addressId = req.body.addressId
+				const userDoc = await User.findOne({userId: req.cookies.userId})
+				const addressInfo = userDoc.addressList.find(item => item.addressId === addressId)
+				if (!addressInfo) {
+					res.json({
+          status: '1',
+          msg: '查询用户配送地址失败',
+          result: ''
+        })
+				}
+				const goodsList = userDoc.cartList.filter(item => item.checked === 1)
+				if (!goodsList) {
+					res.json({
+          status: '1',
+          msg: '查看用户商品列表失败',
+          result: ''
+        })
+				}
+				
+
+				const orderInfo = {
+					orderId,
+					orderTotal,
+					addressInfo,
+					goodsList,
+					orderStatus: '1',
+					createDate
+				}
+				userDoc.orderList.push(orderInfo)
+				await userDoc.save()
         res.json({
           status: '0',
           msg: '',
-          result: orderListDoc.orderList
+          result: {
+						orderId,
+						orderTotal
+					}
         })
       } else {
         res.json({

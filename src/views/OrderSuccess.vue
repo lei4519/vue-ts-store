@@ -19,8 +19,8 @@
         <div class="order-create-main">
           <h3>Congratulations! <br>Your order is under processing!</h3>
           <p>
-            <span>Order ID：100000001</span>
-            <span>Order total：1000</span>
+            <span>Order ID：{{ $route.query.orderId }}</span>
+            <span>Order total：{{ $route.query.orderTotal | currency('$') }}</span>
           </p>
           <div class="order-create-btn-wrap">
             <div class="btn-l-wrap">

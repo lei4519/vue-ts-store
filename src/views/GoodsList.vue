@@ -23,8 +23,8 @@
                      :class="{'cur': priceChecked === 'all'}">All</a></dd>
               <dd v-for="(item, i) in priceFilter" :key="item.startPrice">
                 <a href="javascript:void(0)" @click="setPriceFilter(`${i}`)"
-                   :class="{'cur': priceChecked === i.toString()}">{{ item.startPrice }} - {{
-                  item.endPrice }}</a>
+                   :class="{'cur': priceChecked === i.toString()}">{{ item.startPrice | currency('$') }} - {{
+                  item.endPrice | currency('$') }}</a>
               </dd>
             </dl>
           </div>
@@ -39,7 +39,7 @@
                   </div>
                   <div class="main">
                     <div class="name">{{ item.productName }}</div>
-                    <div class="price">{{ item.salePrice }}</div>
+                    <div class="price">{{ item.salePrice | currency('$') }}</div>
                     <div class="btn-area">
                       <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
                     </div>
@@ -141,9 +141,9 @@
 
     public async created() {
       this.$emit('changeBreadText', 'Goods')
-      this.getGoodsList()
-    }
-
+			this.getGoodsList()
+		}
+		
     @Watch('salePriceSort')
     public onSortChanged(val: string, oldVal: string): void {
       this.goodsListReset()

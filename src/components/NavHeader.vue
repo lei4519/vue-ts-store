@@ -24,7 +24,7 @@
             <a href="javascript:void(0)" class="navbar-link" v-if="!nickName" @click="loginModelFlag = true">Login</a>
             <a href="javascript:void(0)" class="navbar-link" v-if="nickName" @click="logout">Logout</a>
             <div class="navbar-cart-container">
-              <span class="navbar-cart-count"></span>
+              <span class="navbar-cart-count">{{ StateCartCount }}</span>
               <a class="navbar-link navbar-cart-link" href="/cart">
                 <svg class="navbar-cart-logo">
                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
@@ -71,8 +71,6 @@
   import { Vue, Component } from 'vue-property-decorator'
   import Modal from '@/components/Modal.vue'
 
-
-
   @Component({
     components: {
       Modal
@@ -100,6 +98,7 @@
           this.errorTip = false
           this.loginModelFlag = false
           this.nickName = res.userName
+          this.$store.commit('updateCartCount', Number(res.cartCount))
         } else {
           this.errorTip = true
         }
@@ -121,6 +120,7 @@
       const result = (await this.axios.get('/users/checkLogin')).data
       if (result.status === '0') {
         this.nickName = result.result.userName
+        this.$store.commit('updateCartCount', Number(result.result.cartCount))
       } else {
         if (window.location.href !== 'http://localhost:8080/') {
           window.location.href = '/'
@@ -133,6 +133,9 @@
 
     public closeModal() {
       this.loginModelFlag = false
+    }
+    public get StateCartCount(): number {
+        return this.$store.state.cartCount
     }
   }
 </script>
