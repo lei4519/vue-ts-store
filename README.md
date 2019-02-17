@@ -1,26 +1,21 @@
 # vue-ts-store
 
-## Project setup
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+// 运行
+npm i
+npm start
+// 之后访问http://localhost:3000 即可
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## 项目介绍
+  - 使用vue+nodejs实现商城登录及购物车功能
 
-### Run your tests
-```
-npm run test
-```
+## 技术栈
+  - 使用vue全家桶+typescript进行项目开发；
+  - 使用媒体查询实现响应式布局
+  - 使用nodejs的express框架配合云数据库实现数据接口（开始使用的是MongoDB数据库）
 
-### Lints and fixes files
-```
-npm run lint
-```
+## 项目收获
+  - 学习了typescript在vue中的配置和使用
+  - 学习了使用nodejs搭建服务器
+  - 学习了MongoDB数据库的基本使用

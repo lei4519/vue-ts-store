@@ -3,11 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var history = require('connect-history-api-fallback');
 
 var usersRouter = require('./routes/users');
 var goodsRouter = require('./routes/goods');
 
 var app = express();
+
+app.use(history());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -17,24 +20,24 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
+// // login verify handle
+// app.use((req, res, next) => {
+//   const originalUrl = req.originalUrl
+//   if (originalUrl === '/users/login' || originalUrl === '/users/logout' || originalUrl.includes('/goods/goodsList')) {
+//     return next()
+//   }
+//   if (!req.cookies.userId) {
+//     return res.json({
+//       status: '10001',
+//       msg: '当前用户未登录',
+//       result: ''
+//     })
+//   }
+//   next()
+// })
 // login verify handle
-app.use((req, res, next) => {
-  const originalUrl = req.originalUrl
-  if (originalUrl === '/users/login' || originalUrl === '/users/logout' || originalUrl.includes('/goods/goodsList')) {
-    return next()
-  }
-  if (!req.cookies.userId) {
-    return res.json({
-      status: '10001',
-      msg: '当前用户未登录',
-      result: ''
-    })
-  }
-  next()
-})
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/users', usersRouter);
 app.use('/goods', goodsRouter);
 

@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/users')
-const users_db = require('../db/db-users')
 
 router.post('/login', async (req, res) => {
   try {
@@ -9,20 +8,20 @@ router.post('/login', async (req, res) => {
       userName: req.body.userName,
       userPwd: req.body.userPwd
     }
-    const [user] = await users_db.validateUser({"where": params})
-    res.cookie('userId', user.id, {
+    const doc = await User.findOne(params)
+    res.cookie('userId', doc.userId, {
       path: '/',
       maxAge: 1000 * 60 * 60
     })
-    res.cookie('userName', user.userName, {
+    res.cookie('userName', doc.userName, {
       path: '/',
       maxAge: 1000 * 60 * 60
     })
-    if (user.id) {
+    if (doc) {
       res.json({
         status: '0',
         msg: '',
-        userName: user.userName
+        userName: doc.userName
       })
     } else {
       res.json({
@@ -30,6 +29,7 @@ router.post('/login', async (req, res) => {
         msg: '账号密码错误'
       })
     }
+
   } catch (err) {
     res.json({
       status: '1',
@@ -72,11 +72,13 @@ router.post('/login', async (req, res) => {
   .get('/cartList', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const {cartList} = await users_db.queryUserById(req.cookies.userId)
+        const cartListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
         res.json({
           status: '0',
           msg: '',
-          result: cartList
+          result: cartListDoc.cartList
         })
       } else {
         res.json({
@@ -96,8 +98,8 @@ router.post('/login', async (req, res) => {
   .post('/cartDel', async (req, res) => {
     try {
       const productId = req.body.productId
-      const id = req.cookies.userId
-      await users_db.delCartInfo(id, productId)
+      const userId = req.cookies.userId
+      await User.update({userId}, {$pull: {cartList: {productId}}})
       res.json({
         status: '0',
         msg: '删除成功',
@@ -115,15 +117,14 @@ router.post('/login', async (req, res) => {
     try {
       const userId = req.cookies.userId
       const productId = req.body.productId
-      const user = await users_db.queryUserById(userId)
-      const product = user.cartList.find(item => item.productId === productId)
-      product.productNum = req.body.productNum
-      product.checked = req.body.checked
-      await users_db.addUserInfo(user.id, user)
+      const productNum = req.body.productNum
+      const checked = req.body.checked
+      await User.update({'userId': userId, 'cartList.productId': productId},
+        {'cartList.$.productNum': productNum, 'cartList.$.checked': checked})
       res.json({
         status: '0',
         msg: '',
-        result: user
+        result: ''
       })
     } catch (err) {
       res.json({
@@ -137,9 +138,9 @@ router.post('/login', async (req, res) => {
     try {
       const userId = req.cookies.userId
       const checked = req.body.checked
-      const user = await users_db.queryUserById(userId)
-      user.cartList.forEach(item => item.checked = checked)
-      await users_db.addUserInfo(user.id, user)
+      const userDoc = await User.findOne({userId})
+      userDoc.cartList.forEach(item => item.checked = checked)
+      await userDoc.save()
       res.json({
         status: '0',
         msg: '',
@@ -157,12 +158,13 @@ router.post('/login', async (req, res) => {
   .get('/addressList', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const {addressList} = await users_db.queryUserById(userId)
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
         res.json({
           status: '0',
           msg: '',
-          result: addressList
+          result: addressListDoc.addressList
         })
       } else {
         res.json({
@@ -182,10 +184,11 @@ router.post('/login', async (req, res) => {
   .post('/addAddress', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const user = await users_db.queryUserById(userId)
-        user.addressList.push(req.body.addressInfo)
-        await users_db.addUserInfo(user.id, user)
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
+        addressListDoc.addressList.push(req.body.addressInfo)
+        await addressListDoc.save()
         res.json({
           status: '0',
           msg: '',
@@ -209,20 +212,19 @@ router.post('/login', async (req, res) => {
   .post('/setDefault', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const user = await users_db.queryUserById(userId)
-
         const addressId = req.body.addressId
-
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
         let defaultIndex = 0
-        user.addressList.forEach((item, i) => {
+        addressListDoc.addressList.forEach((item, i) => {
           item.isDefault = (item.addressId === addressId)
           if (item.addressId === addressId) {
             defaultIndex = i
           }
         })
-        user.addressList.unshift(user.addressList.splice(defaultIndex, 1)[0])
-        await users_db.addUserInfo(user.id, user)
+        addressListDoc.addressList.unshift(addressListDoc.addressList.splice(defaultIndex, 1)[0])
+        await addressListDoc.save()
         res.json({
           status: '0',
           msg: '',
@@ -246,15 +248,13 @@ router.post('/login', async (req, res) => {
   .post('/delAddress', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const user = await users_db.queryUserById(userId)
-        
         const addressId = req.body.addressId
-        
-        const delAddressIndex = user.addressList.findIndex(item => item.addressId === addressId)
-        user.addressList.splice(delAddressIndex, 1)
-
-        await users_db.addUserInfo(user.id, user)
+        const addressListDoc = await User.findOne({
+          userId: req.cookies.userId,
+        })
+        const delAddressIndex = addressListDoc.addressList.findIndex(item => item.addressId === addressId)
+        addressListDoc.addressList.splice(delAddressIndex, 1)
+        await addressListDoc.save()
         res.json({
           status: '0',
           msg: '',
@@ -278,10 +278,8 @@ router.post('/login', async (req, res) => {
   .get('/checkedCartList', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const user = await users_db.queryUserById(userId)
-
-        const checkedCartList = user.cartList.filter(item => item.checked === 1)
+        const cartListDoc = await User.findOne({userId: req.cookies.userId})
+        let checkedCartList = cartListDoc.cartList.filter(item => item.checked === 1)
         res.json({
           status: '0',
           msg: '',
@@ -305,44 +303,11 @@ router.post('/login', async (req, res) => {
   .get('/orderList', async (req, res) => {
     try {
       if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const {orderList} = await users_db.queryUserById(userId)
-
+        const orderListDoc = await User.findOne({userId: req.cookies.userId})
         res.json({
           status: '0',
           msg: '',
-          result: orderList
-        })
-      } else {
-        res.json({
-          status: '1001',
-          msg: '未登录',
-          result: ''
-        })
-      }
-    } catch (err) {
-      res.json({
-        status: '1',
-        msg: err.message,
-        result: ''
-      })
-    }
-  })
-  .post('/orderSuccess', async (req, res) => {
-    try {
-      if (req.cookies.userId) {
-        const userId = req.cookies.userId
-        const user = await users_db.queryUserById(userId)
-        user.cartList.forEach((item, i, arr) => {
-          if (item.checked) {
-            arr.splice(i, 1)
-          }
-        })
-        await users_db.addUserInfo(user.id, user)
-        res.json({
-          status: '0',
-          msg: '',
-          result: user
+          result: orderListDoc.orderList
         })
       } else {
         res.json({

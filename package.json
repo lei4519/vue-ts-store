@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "nodemon ./server/bin/www",
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "connect-history-api-fallback": "^1.6.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "dts-generator": "^2.1.0",
@@ -17,6 +19,7 @@
     "jade": "~1.11.0",
     "mongoose": "^5.3.4",
     "morgan": "~1.9.0",
+    "sha1": "^1.1.1",
     "vue": "^2.5.17",
     "vue-axios": "^2.1.4",
     "vue-class-component": "^6.0.0",
@@ -25,7 +28,8 @@
     "vue-lazyload": "^1.2.6",
     "vue-property-decorator": "^7.0.0",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "vuex-class": "^0.3.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.5",

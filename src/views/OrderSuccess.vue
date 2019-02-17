@@ -42,7 +42,7 @@
   @Component
   export default class OrderSuccess extends Vue {
     public created() {
-      this.$emit('changeBreadText', 'Order Success')
+      this.$store.commit('changeBreadText', 'Order Success')
     }
   }
 </script>
